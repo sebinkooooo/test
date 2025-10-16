@@ -13,5 +13,9 @@ void remainder_tree_down(const CRTProductTree &T, const cpp_int &N,
 std::vector<u32> choose_moduli_dynamic(const std::vector<u32>& primes, 
                                        const cpp_int& N, int safety_bits, 
                                        int* out_k = nullptr);
+
+// ADD THESE TWO LINES:
+std::vector<u64> garner_from_residues_fast(const std::vector<u64>& r, 
+                                           const std::vector<u64>& m);
 std::vector<u64> garner_from_residues(const std::vector<u64>& r, 
                                       const std::vector<u64>& m);
