@@ -6,7 +6,7 @@
 #include <string>
 #include <chrono>
 
-// For k=50,000, we ONLY store the diagonal inv[i][i]
+// For k=50,000, we ONsLY store the diagonal inv[i][i]
 // Storage: 50,000 × 8 bytes = 400 KB (vs 20 GB for full matrix!)
 
 void generate_inverse_diagonal(const std::vector<u32>& primes, 

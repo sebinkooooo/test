@@ -28,8 +28,14 @@ std::vector<u64> garner_from_residues_fast(
         throw std::runtime_error("garner_fast: size mismatch");
     }
 
+    // ADD THIS DEBUG OUTPUT:
+    static bool first_call = true;
+    if (first_call) {
+        printf("[DEBUG] Using FAST Garner with precomputed inverses for k=%zu\n", k);
+        first_call = false;
+    }
+
     // Select the appropriate precomputed inverse diagonal
-    // Use exact match or next larger table
     const u64* inv_diag = nullptr;
     
     if (k <= 16) {
