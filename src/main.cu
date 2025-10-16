@@ -179,7 +179,10 @@ void run_crt_benchmark_32(int M, const cpp_int& N,
     if (GPU_GENERATE_DIVISORS) {
         int threads = 256;
         int blocks = (M + threads - 1) / threads;
-        generate_divisors_kernel_32<<<blocks, threads>>>(BASE_SEED_32, M, d_P);
+        // CRITICAL: Use same offset as CPU (100M) to avoid CRT prime collisions
+        const int START_OFFSET = 100000000;
+        u32 offset_seed = BASE_SEED_32 + (u32)((uint64_t)START_OFFSET * 104729ull);
+        generate_divisors_kernel_32<<<blocks, threads>>>(offset_seed, M, d_P);
         CUDA_CHECK(cudaDeviceSynchronize());
     } else {
         std::vector<u32> P_cpu(M);
@@ -276,7 +279,10 @@ void run_crt_benchmark_64(int M, const cpp_int& N,
     if (GPU_GENERATE_DIVISORS) {
         int threads = 256;
         int blocks = (M + threads - 1) / threads;
-        generate_divisors_kernel_64<<<blocks, threads>>>(BASE_SEED_64, M, d_P);
+        // CRITICAL: Use same offset as CPU (100M) to avoid CRT prime collisions
+        const int START_OFFSET = 100000000;
+        u64 offset_seed = BASE_SEED_64 + (u64)START_OFFSET * 104729ull;
+        generate_divisors_kernel_64<<<blocks, threads>>>(offset_seed, M, d_P);
         CUDA_CHECK(cudaDeviceSynchronize());
     } else {
         std::vector<u64> P_cpu(M);
