@@ -18,6 +18,85 @@
 #include "garner_inv_k25000.hpp"
 #include "garner_inv_k50000.hpp"
 
+// Add these implementations at the end of src/crt.cpp
+
+CRTProductTree build_product_tree(const std::vector<u32>& m) {
+    CRTProductTree tree;
+    if (m.empty()) return tree;
+    
+    tree.levels.push_back(std::vector<cpp_int>());
+    for (u32 mi : m) {
+        tree.levels[0].push_back(cpp_int(mi));
+    }
+    
+    while (tree.levels.back().size() > 1) {
+        const auto& prev = tree.levels.back();
+        std::vector<cpp_int> next;
+        
+        for (size_t i = 0; i + 1 < prev.size(); i += 2) {
+            next.push_back(prev[i] * prev[i + 1]);
+        }
+        if (prev.size() % 2 == 1) {
+            next.push_back(prev.back());
+        }
+        
+        tree.levels.push_back(next);
+    }
+    
+    return tree;
+}
+
+void remainder_tree_down(const CRTProductTree &T, const cpp_int &N, 
+                        std::vector<cpp_int> &leaf_rems) {
+    if (T.levels.empty()) return;
+    
+    std::vector<std::vector<cpp_int>> rems;
+    rems.resize(T.levels.size());
+    
+    // Root level
+    rems.back().push_back(N % T.levels.back()[0]);
+    
+    // Descend
+    for (int lvl = (int)T.levels.size() - 2; lvl >= 0; --lvl) {
+        const auto& parent_rems = rems[lvl + 1];
+        const auto& nodes = T.levels[lvl];
+        
+        for (size_t i = 0; i < parent_rems.size(); ++i) {
+            size_t left_idx = 2 * i;
+            size_t right_idx = 2 * i + 1;
+            
+            if (left_idx < nodes.size()) {
+                rems[lvl].push_back(parent_rems[i] % nodes[left_idx]);
+            }
+            if (right_idx < nodes.size()) {
+                rems[lvl].push_back(parent_rems[i] % nodes[right_idx]);
+            }
+        }
+    }
+    
+    leaf_rems = rems[0];
+}
+
+std::vector<u32> choose_moduli_dynamic(const std::vector<u32>& primes, 
+                                       const cpp_int& N, int safety_bits, 
+                                       int* out_k) {
+    size_t nbits = bitlen_cppint(N);
+    size_t target = nbits + safety_bits;
+    
+    cpp_int prod = 1;
+    size_t bits_acc = 0;
+    int k = 0;
+    
+    while (bits_acc < target && k < (int)primes.size()) {
+        prod *= cpp_int(primes[k]);
+        bits_acc = bitlen_cppint(prod);
+        ++k;
+    }
+    
+    if (out_k) *out_k = k;
+    return std::vector<u32>(primes.begin(), primes.begin() + k);
+}
+
 // Fast Garner using precomputed inverse diagonal
 std::vector<u64> garner_from_residues_fast(
     const std::vector<u64>& r, 
