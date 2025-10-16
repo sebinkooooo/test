@@ -234,11 +234,14 @@ void run_crt_benchmark_32(int M, const cpp_int& N,
         CUDA_CHECK(cudaEventDestroy(t1));
         
         // CPU compute
+        // CPU compute
         auto t_cpu_start = now_tp();
         cpu_chunk.resize(chunk);
         if (GPU_GENERATE_DIVISORS) {
+            // CRITICAL: Use same offset as GPU (100M)
+            const int START_OFFSET = 100000000;
             for (int i = 0; i < chunk; ++i) {
-                u32 p = divisor_at_32(BASE_SEED_32, offset + i);
+                u32 p = divisor_at_32(BASE_SEED_32, START_OFFSET + offset + i);
                 cpu_chunk[i] = (u32)(N % cpp_int(p));
             }
         } else {
@@ -334,11 +337,14 @@ void run_crt_benchmark_64(int M, const cpp_int& N,
         CUDA_CHECK(cudaEventDestroy(t1));
         
         // CPU compute
+        // CPU compute
         auto t_cpu_start = now_tp();
         cpu_chunk.resize(chunk);
         if (GPU_GENERATE_DIVISORS) {
+            // CRITICAL: Use same offset as GPU (100M)
+            const int START_OFFSET = 100000000;
             for (int i = 0; i < chunk; ++i) {
-                u64 p = divisor_at_64(BASE_SEED_64, offset + i);
+                u64 p = divisor_at_64(BASE_SEED_64, START_OFFSET + offset + i);
                 cpu_chunk[i] = (u64)(N % cpp_int(p));
             }
         } else {
